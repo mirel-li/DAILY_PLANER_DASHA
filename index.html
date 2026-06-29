@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Конструктор дня</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#F7F5F0;
+  --card:#FFFFFF;
+  --text:#2E2A28;
+  --muted:#9A938C;
+  --line:#ECE8E1;
+  --cat1:#F6C6D0; /* Спорт/Тело - розовый */
+  --cat2:#A8D8B9; /* Работа - зелёный */
+  --cat3:#BFE3F0; /* Развитие - голубой */
+  --cat4:#D8CFEF; /* Семья/Люди - лавандовый */
+  --cat5:#F5E6A8; /* Быт - жёлтый */
+  --cat6:#F7CBA4; /* Отдых - оранжевый */
+  --radius:18px;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  font-family:'DM Sans', system-ui, -apple-system, sans-serif;
+  color:var(--text);
+}
+h1,h2,h3,.serif{
+  font-family:'Playfair Display', Georgia, serif;
+}
+button{
+  font-family:inherit;
+  border:none;
+  cursor:pointer;
+  background:none;
+}
+.app{
+  max-width:1300px;
+  margin:0 auto;
+  padding:28px 24px 60px;
+}
+header.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:16px;
+  margin-bottom:24px;
+}
+header.top h1{
+  font-size:30px;
+  font-weight:700;
+  margin:0;
+}
+.days{
+  display:flex;
+  gap:8px;
+  background:var(--card);
+  padding:6px;
+  border-radius:999px;
+  flex-wrap:wrap;
+}
+.day-btn{
+  padding:9px 16px;
+  border-radius:999px;
+  font-size:14px;
+  font-weight:500;
+  color:var(--muted);
+  transition:.15s;
+}
+.day-btn:hover{ background:var(--line); }
+.day-btn.active{
+  background:var(--text);
+  color:#fff;
+}
+.clear-btn{
+  padding:10px 18px;
+  border-radius:999px;
+  background:var(--card);
+  color:#C9645A;
+  font-weight:500;
+  font-size:14px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+.clear-btn:hover{ background:#FBEAE8; }
+
+.balance-wrap{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:18px 22px;
+  margin-bottom:22px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.balance-title{
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:10px;
+  display:flex;
+  justify-content:space-between;
+}
+.balance-bar{
+  display:flex;
+  height:14px;
+  border-radius:999px;
+  overflow:hidden;
+  background:var(--line);
+}
+.balance-seg{
+  height:100%;
+  transition:width .25s;
+}
+.balance-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px;
+  margin-top:12px;
+  font-size:12.5px;
+  color:var(--muted);
+}
+.balance-legend span.dot{
+  display:inline-block;
+  width:9px;height:9px;
+  border-radius:50%;
+  margin-right:6px;
+}
+.warning{
+  margin-top:10px;
+  font-size:13px;
+  color:#B5573D;
+  background:#FBEFE6;
+  padding:8px 12px;
+  border-radius:10px;
+  display:none;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:300px 1fr;
+  gap:22px;
+}
+@media (max-width:850px) and (orientation:portrait){
+  .layout{ grid-template-columns:1fr; }
+}
+@media (max-width:600px) and (orientation:landscape){
+  .layout{ grid-template-columns:1fr; }
+}
+@media (min-width:601px){
+  .layout{ grid-template-columns:300px 1fr; }
+}
+
+.library{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+.cat-block{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:16px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.cat-header{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:10px;
+}
+.cat-dot{
+  width:12px;height:12px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+.cat-header h3{
+  font-size:16px;
+  margin:0;
+  flex:1;
+}
+.lib-items{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.lib-item{
+  position:relative;
+  border-radius:12px;
+  padding:10px 12px;
+  font-size:13.5px;
+  font-weight:500;
+  cursor:grab;
+  user-select:none;
+  border:1px solid transparent;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px;
+}
+.lib-item .name{ flex:1; }
+.lib-item .meta{
+  font-size:11.5px;
+  font-weight:400;
+  color:rgba(0,0,0,0.5);
+  display:block;
+  margin-top:2px;
+}
+.lib-item.selected{
+  outline:2px solid var(--text);
+}
+.lib-actions{
+  display:flex;
+  gap:4px;
+  opacity:0.55;
+}
+.lib-actions button{
+  width:22px;height:22px;
+  font-size:12px;
+  border-radius:6px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.lib-actions button:hover{ background:rgba(0,0,0,0.08); }
+
+.add-btn{
+  margin-top:4px;
+  font-size:13px;
+  color:var(--muted);
+  font-weight:500;
+  padding:8px 0;
+  text-align:left;
+}
+.add-btn:hover{ color:var(--text); }
+
+.grid-panel{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:18px 16px 22px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
+  overflow-x:auto;
+}
+.grid-scroll{
+  display:flex;
+  align-items:stretch;
+  min-width:max-content;
+}
+.hour-row{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  border-right:1px solid var(--line);
+  padding:0 8px;
+  width:128px;
+  flex-shrink:0;
+}
+.hour-row:last-child{ border-right:none; }
+.hour-label{
+  font-size:13px;
+  color:var(--muted);
+  text-align:center;
+  padding:0 0 10px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:10px;
+  font-weight:500;
+}
+.hour-cell{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-height:340px;
+  border-radius:10px;
+  padding:2px;
+  transition:background .12s;
+}
+.hour-cell.dragover{
+  background:#F1EFE9;
+}
+.block-chip{
+  position:relative;
+  border-radius:12px;
+  padding:8px 26px 8px 12px;
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+  width:100%;
+  user-select:none;
+}
+.block-chip .name{ display:block; }
+.block-chip .meta{
+  font-size:11px;
+  font-weight:400;
+  opacity:0.65;
+}
+.block-chip .remove{
+  position:absolute;
+  top:4px;
+  right:4px;
+  width:18px;height:18px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  color:#444;
+}
+.block-chip .remove:hover{ background:rgba(255,255,255,0.95); }
+
+/* category colors */
+.c1{ background:var(--cat1); } .c1b{ background:var(--cat1); }
+.c2{ background:var(--cat2); }
+.c3{ background:var(--cat3); }
+.c4{ background:var(--cat4); }
+.c5{ background:var(--cat5); }
+.c6{ background:var(--cat6); }
+
+/* modal */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(40,36,32,0.35);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  z-index:50;
+}
+.overlay.show{ display:flex; }
+.modal{
+  background:var(--card);
+  border-radius:20px;
+  padding:26px 26px 22px;
+  width:100%;
+  max-width:380px;
+  max-height:88vh;
+  overflow-y:auto;
+}
+.modal h2{
+  font-size:21px;
+  margin:0 0 14px;
+}
+.modal .row{
+  margin-bottom:10px;
+  font-size:13.5px;
+  display:flex;
+  gap:8px;
+}
+.modal .row .k{ color:var(--muted); width:110px; flex-shrink:0; }
+.modal-actions{
+  display:flex;
+  gap:10px;
+  margin-top:18px;
+}
+.btn{
+  padding:10px 16px;
+  border-radius:10px;
+  font-size:13.5px;
+  font-weight:500;
+}
+.btn-primary{ background:var(--text); color:#fff; }
+.btn-secondary{ background:var(--line); color:var(--text); }
+.btn-danger{ background:#FBEAE8; color:#B5573D; }
+.btn:hover{ opacity:0.85; }
+
+.form label{
+  display:block;
+  font-size:12.5px;
+  color:var(--muted);
+  margin:12px 0 5px;
+}
+.form input, .form select, .form textarea{
+  width:100%;
+  padding:9px 11px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  font-family:inherit;
+  font-size:13.5px;
+  background:#FBFAF7;
+}
+.form textarea{ resize:vertical; min-height:50px; }
+
+.close-x{
+  position:absolute;
+  top:14px;
+  right:16px;
+  font-size:16px;
+  color:var(--muted);
+}
+.modal{ position:relative; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <h1>Конструктор дня</h1>
+    <div class="days" id="dayTabs"></div>
+    <button class="clear-btn" id="clearDayBtn">Очистить день</button>
+  </header>
+
+  <div class="balance-wrap">
+    <div class="balance-title"><span>Баланс дня</span><span id="totalCount">0 блоков</span></div>
+    <div class="balance-bar" id="balanceBar"></div>
+    <div class="balance-legend" id="balanceLegend"></div>
+    <div class="warning" id="balanceWarning"></div>
+  </div>
+
+  <div class="layout">
+    <div class="library" id="library"></div>
+
+    <div class="grid-panel">
+      <div id="grid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="detailOverlay">
+  <div class="modal" id="detailModal">
+    <button class="close-x" data-close>✕</button>
+    <h2 id="dName"></h2>
+    <div class="row"><div class="k">Время</div><div id="dHour"></div></div>
+    <div class="row"><div class="k">Длительность</div><div id="dDuration"></div></div>
+    <div class="row"><div class="k">Локация</div><div id="dLocation"></div></div>
+    <div class="row"><div class="k">Внешний вид</div><div id="dLook"></div></div>
+    <div class="row"><div class="k">Заметка</div><div id="dNote"></div></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="editFromDetail">Редактировать</button>
+      <button class="btn btn-danger" id="deleteFromDetail">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="formOverlay">
+  <div class="modal" id="formModal">
+    <button class="close-x" data-close>✕</button>
+    <h2 id="formTitle">Новый блок</h2>
+    <div class="form">
+      <label>Категория</label>
+      <select id="fCategory"></select>
+      <label>Название</label>
+      <input id="fName" type="text" placeholder="Например, Чтение книги">
+      <label>Длительность</label>
+      <input id="fDuration" type="text" placeholder="например 30-60 мин">
+      <label>Локация</label>
+      <input id="fLocation" type="text" placeholder="дома / офис / улица">
+      <label>Внешний вид</label>
+      <select id="fLook">
+        <option value="не нужен">не нужен</option>
+        <option value="casual">casual</option>
+        <option value="полный образ">полный образ</option>
+      </select>
+      <label>Заметка / подсказка</label>
+      <textarea id="fNote" placeholder="короткая подсказка для себя"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="saveFormBtn">Сохранить</button>
+      <button class="btn btn-secondary" data-close>Отмена</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const STORAGE_KEY = "dayPlannerData_v1";
+  const DAYS = ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+  const HOURS = [];
+  for(let h=6; h<=23; h++) HOURS.push(h);
+
+  const CATEGORIES = [
+    {id:"c2", name:"Работа",        cls:"c2"},
+    {id:"c1", name:"Спорт / Тело",  cls:"c1"},
+    {id:"c4", name:"Семья / Люди",  cls:"c4"},
+    {id:"c3", name:"Развитие",      cls:"c3"},
+    {id:"c5", name:"Быт",           cls:"c5"},
+    {id:"c6", name:"Отдых",         cls:"c6"},
+  ];
+
+  function defaultTemplates(){
+    return {
+      c2:[
+        {id:uid(), name:"Глубокая работа", duration:"90-120 мин", location:"офис / дома", look:"не нужен", note:"отключить уведомления"},
+        {id:uid(), name:"Письма и почта", duration:"30 мин", location:"офис", look:"не нужен", note:"проверять не чаще 2 раз в день"},
+        {id:uid(), name:"Созвон с командой", duration:"30-60 мин", location:"офис", look:"casual", note:"подготовить агенду заранее"},
+      ],
+      c1:[
+        {id:uid(), name:"Утренняя зарядка", duration:"15-20 мин", location:"дома", look:"не нужен", note:"перед душем"},
+        {id:uid(), name:"Тренировка в зале", duration:"60 мин", location:"спортзал", look:"спортивная форма", note:"взять бутылку воды"},
+        {id:uid(), name:"Прогулка", duration:"30 мин", location:"улица", look:"casual", note:"можно совместить с подкастом"},
+      ],
+      c4:[
+        {id:uid(), name:"Завтрак с семьёй", duration:"30 мин", location:"дома", look:"не нужен", note:"без телефонов за столом"},
+        {id:uid(), name:"Звонок родителям", duration:"20 мин", location:"дома", look:"не нужен", note:""},
+        {id:uid(), name:"Вечер с близким человеком", duration:"60-90 мин", location:"дома / улица", look:"casual", note:""},
+      ],
+      c3:[
+        {id:uid(), name:"Чтение книги", duration:"30 мин", location:"дома", look:"не нужен", note:"перед сном"},
+        {id:uid(), name:"Курс / обучение", duration:"45-60 мин", location:"дома", look:"не нужен", note:""},
+        {id:uid(), name:"Языковая практика", duration:"20 мин", location:"дома", look:"не нужен", note:"приложение или подкаст"},
+      ],
+      c5:[
+        {id:uid(), name:"Уборка", duration:"30-45 мин", location:"дома", look:"не нужен", note:""},
+        {id:uid(), name:"Готовка ужина", duration:"40 мин", location:"дома", look:"не нужен", note:""},
+        {id:uid(), name:"Покупки", duration:"30-45 мин", location:"улица", look:"casual", note:"взять список"},
+      ],
+      c6:[
+        {id:uid(), name:"Фильм / сериал", duration:"60-90 мин", location:"дома", look:"не нужен", note:""},
+        {id:uid(), name:"Хобби", duration:"45 мин", location:"дома", look:"не нужен", note:""},
+        {id:uid(), name:"Ничегонеделание", duration:"20 мин", location:"дома", look:"не нужен", note:"без чувства вины"},
+      ],
+    };
+  }
+
+  function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
+
+  function emptySchedule(){
+    const s = {};
+    DAYS.forEach(d => s[d] = []);
+    return s;
+  }
+
+  function loadData(){
+    let raw;
+    try{ raw = JSON.parse(localStorage.getItem(STORAGE_KEY)); }catch(e){ raw = null; }
+    if(raw && raw.templates && raw.schedule){
+      return raw;
+    }
+    const data = { templates: defaultTemplates(), schedule: emptySchedule() };
+    // preset fixed blocks for Monday
+    const t = data.templates;
+    data.schedule["Пн"].push(
+      {placedId:uid(), templateId:t.c1[0].id, catId:"c1", name:t.c1[0].name, duration:t.c1[0].duration, location:t.c1[0].location, look:t.c1[0].look, note:t.c1[0].note, hour:7},
+      {placedId:uid(), templateId:t.c4[0].id, catId:"c4", name:t.c4[0].name, duration:t.c4[0].duration, location:t.c4[0].location, look:t.c4[0].look, note:t.c4[0].note, hour:8},
+      {placedId:uid(), templateId:t.c2[0].id, catId:"c2", name:t.c2[0].name, duration:t.c2[0].duration, location:t.c2[0].location, look:t.c2[0].look, note:t.c2[0].note, hour:9}
+    );
+    return data;
+  }
+
+  let data = loadData();
+  let currentDay = DAYS[0];
+  let selectedTemplate = null; // {catId, template}
+  let draggingPlacedId = null;
+
+  function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+  function catById(id){ return CATEGORIES.find(c=>c.id===id); }
+
+  // ---------- RENDER DAY TABS ----------
+  function renderDayTabs(){
+    const wrap = document.getElementById("dayTabs");
+    wrap.innerHTML = "";
+    DAYS.forEach(d=>{
+      const b = document.createElement("button");
+      b.className = "day-btn" + (d===currentDay ? " active":"");
+      b.textContent = d;
+      b.onclick = ()=>{ currentDay = d; selectedTemplate=null; renderAll(); };
+      wrap.appendChild(b);
+    });
+  }
+
+  // ---------- RENDER LIBRARY ----------
+  function renderLibrary(){
+    const wrap = document.getElementById("library");
+    wrap.innerHTML = "";
+    CATEGORIES.forEach(cat=>{
+      const box = document.createElement("div");
+      box.className = "cat-block";
+
+      const header = document.createElement("div");
+      header.className = "cat-header";
+      header.innerHTML = `<span class="cat-dot ${cat.cls}"></span><h3>${cat.name}</h3>`;
+      box.appendChild(header);
+
+      const itemsWrap = document.createElement("div");
+      itemsWrap.className = "lib-items";
+
+      (data.templates[cat.id]||[]).forEach(tpl=>{
+        const item = document.createElement("div");
+        item.className = "lib-item " + cat.cls;
+        if(selectedTemplate && selectedTemplate.template.id===tpl.id) item.classList.add("selected");
+        item.draggable = true;
+        item.innerHTML = `<div class="name">${escapeHtml(tpl.name)}<span class="meta">${escapeHtml(tpl.duration||"")}</span></div>
+          <div class="lib-actions">
+            <button data-act="edit" title="Редактировать">✎</button>
+            <button data-act="del" title="Удалить">🗑</button>
+          </div>`;
+
+        item.addEventListener("dragstart", (e)=>{
+          e.dataTransfer.setData("text/plain", JSON.stringify({type:"template", catId:cat.id, templateId:tpl.id}));
+        });
+
+        item.addEventListener("click", (e)=>{
+          if(e.target.closest("[data-act]")) return;
+          if(selectedTemplate && selectedTemplate.template.id===tpl.id){
+            selectedTemplate = null;
+          } else {
+            selectedTemplate = {catId:cat.id, template:tpl};
+          }
+          renderLibrary();
+        });
+
+        item.querySelector('[data-act="edit"]').addEventListener("click", (e)=>{
+          e.stopPropagation();
+          openTemplateForm(cat.id, tpl);
+        });
+        item.querySelector('[data-act="del"]').addEventListener("click", (e)=>{
+          e.stopPropagation();
+          if(confirm("Удалить блок из библиотеки?")){
+            data.templates[cat.id] = data.templates[cat.id].filter(x=>x.id!==tpl.id);
+            save();
+            renderAll();
+          }
+        });
+
+        itemsWrap.appendChild(item);
+      });
+
+      box.appendChild(itemsWrap);
+
+      const addBtn = document.createElement("button");
+      addBtn.className = "add-btn";
+      addBtn.textContent = "+ добавить";
+      addBtn.onclick = ()=> openTemplateForm(cat.id, null);
+      box.appendChild(addBtn);
+
+      wrap.appendChild(box);
+    });
+  }
+
+  // ---------- RENDER GRID ----------
+  function renderGrid(){
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    const scroll = document.createElement("div");
+    scroll.className = "grid-scroll";
+    const dayBlocks = data.schedule[currentDay] || [];
+
+    HOURS.forEach(h=>{
+      const row = document.createElement("div");
+      row.className = "hour-row";
+
+      const label = document.createElement("div");
+      label.className = "hour-label";
+      label.textContent = (h<10?"0"+h:h) + ":00";
+      row.appendChild(label);
+
+      const cell = document.createElement("div");
+      cell.className = "hour-cell";
+      cell.dataset.hour = h;
+
+      cell.addEventListener("dragover", (e)=>{ e.preventDefault(); cell.classList.add("dragover"); });
+      cell.addEventListener("dragleave", ()=> cell.classList.remove("dragover"));
+      cell.addEventListener("drop", (e)=>{
+        e.preventDefault();
+        cell.classList.remove("dragover");
+        handleDrop(e, h);
+      });
+      cell.addEventListener("click", ()=>{
+        if(selectedTemplate){
+          placeTemplate(selectedTemplate.catId, selectedTemplate.template, h);
+          selectedTemplate = null;
+          renderAll();
+        }
+      });
+
+      dayBlocks.filter(b=>b.hour===h).forEach(b=>{
+        cell.appendChild(renderChip(b));
+      });
+
+      row.appendChild(cell);
+      scroll.appendChild(row);
+    });
+    grid.appendChild(scroll);
+  }
+
+  function renderChip(b){
+    const cat = catById(b.catId);
+    const chip = document.createElement("div");
+    chip.className = "block-chip " + (cat?cat.cls:"");
+    chip.draggable = true;
+    chip.innerHTML = `<span class="name">${escapeHtml(b.name)}</span><span class="meta">${escapeHtml(b.duration||"")}</span><button class="remove" title="Убрать">✕</button>`;
+
+    chip.addEventListener("dragstart", (e)=>{
+      e.dataTransfer.setData("text/plain", JSON.stringify({type:"placed", placedId:b.placedId}));
+    });
+
+    chip.addEventListener("click", (e)=>{
+      if(e.target.closest(".remove")) return;
+      openDetail(b);
+    });
+
+    chip.querySelector(".remove").addEventListener("click", (e)=>{
+      e.stopPropagation();
+      removePlaced(b.placedId);
+    });
+
+    return chip;
+  }
+
+  function handleDrop(e, hour){
+    let payload;
+    try{ payload = JSON.parse(e.dataTransfer.getData("text/plain")); }catch(err){ return; }
+    if(!payload) return;
+    if(payload.type === "template"){
+      const tpl = (data.templates[payload.catId]||[]).find(t=>t.id===payload.templateId);
+      if(tpl) placeTemplate(payload.catId, tpl, hour);
+    } else if(payload.type === "placed"){
+      const block = data.schedule[currentDay].find(b=>b.placedId===payload.placedId);
+      if(block){ block.hour = hour; save(); }
+    }
+    selectedTemplate = null;
+    renderAll();
+  }
+
+  function placeTemplate(catId, tpl, hour){
+    data.schedule[currentDay].push({
+      placedId: uid(),
+      templateId: tpl.id,
+      catId: catId,
+      name: tpl.name,
+      duration: tpl.duration,
+      location: tpl.location,
+      look: tpl.look,
+      note: tpl.note,
+      hour: hour
+    });
+    save();
+  }
+
+  function removePlaced(placedId){
+    data.schedule[currentDay] = data.schedule[currentDay].filter(b=>b.placedId!==placedId);
+    save();
+    renderAll();
+  }
+
+  // ---------- BALANCE ----------
+  function renderBalance(){
+    const dayBlocks = data.schedule[currentDay] || [];
+    const total = dayBlocks.length;
+    document.getElementById("totalCount").textContent = total + (total===1?" блок": " блоков");
+
+    const counts = {};
+    CATEGORIES.forEach(c=> counts[c.id]=0);
+    dayBlocks.forEach(b=> counts[b.catId] = (counts[b.catId]||0)+1);
+
+    const bar = document.getElementById("balanceBar");
+    bar.innerHTML = "";
+    const legend = document.getElementById("balanceLegend");
+    legend.innerHTML = "";
+    const warningEl = document.getElementById("balanceWarning");
+    let warnCat = null;
+
+    CATEGORIES.forEach(cat=>{
+      const cnt = counts[cat.id];
+      if(cnt<=0) return;
+      const pct = total? (cnt/total*100) : 0;
+      const seg = document.createElement("div");
+      seg.className = "balance-seg " + cat.cls;
+      seg.style.width = pct + "%";
+      bar.appendChild(seg);
+
+      const leg = document.createElement("span");
+      leg.innerHTML = `<span class="dot ${cat.cls}"></span>${cat.name} — ${cnt} (${Math.round(pct)}%)`;
+      legend.appendChild(leg);
+
+      if(total>0 && pct>60) warnCat = cat;
+    });
+
+    if(warnCat){
+      warningEl.style.display = "block";
+      warningEl.textContent = `Категория «${warnCat.name}» занимает больше 60% дня — возможен перекос баланса.`;
+    } else {
+      warningEl.style.display = "none";
+    }
+  }
+
+  // ---------- DETAIL MODAL ----------
+  let detailTarget = null;
+  function openDetail(b){
+    detailTarget = b;
+    document.getElementById("dName").textContent = b.name;
+    document.getElementById("dHour").textContent = (b.hour<10?"0"+b.hour:b.hour) + ":00";
+    document.getElementById("dDuration").textContent = b.duration || "—";
+    document.getElementById("dLocation").textContent = b.location || "—";
+    document.getElementById("dLook").textContent = b.look || "—";
+    document.getElementById("dNote").textContent = b.note || "—";
+    showOverlay("detailOverlay");
+  }
+
+  document.getElementById("editFromDetail").addEventListener("click", ()=>{
+    if(!detailTarget) return;
+    hideOverlay("detailOverlay");
+    openPlacedForm(detailTarget);
+  });
+  document.getElementById("deleteFromDetail").addEventListener("click", ()=>{
+    if(!detailTarget) return;
+    removePlaced(detailTarget.placedId);
+    hideOverlay("detailOverlay");
+  });
+
+  // ---------- FORM (template add/edit) ----------
+  let formMode = null; // "template" | "placed"
+  let formCatId = null;
+  let formTplId = null;
+  let formPlacedId = null;
+
+  function fillCategorySelect(){
+    const sel = document.getElementById("fCategory");
+    sel.innerHTML = "";
+    CATEGORIES.forEach(c=>{
+      const o = document.createElement("option");
+      o.value = c.id; o.textContent = c.name;
+      sel.appendChild(o);
+    });
+  }
+
+  function openTemplateForm(catId, tpl){
+    formMode = "template";
+    formCatId = catId;
+    formTplId = tpl ? tpl.id : null;
+    formPlacedId = null;
+    fillCategorySelect();
+    document.getElementById("fCategory").value = catId;
+    document.getElementById("formTitle").textContent = tpl ? "Редактировать блок" : "Новый блок";
+    document.getElementById("fName").value = tpl? tpl.name : "";
+    document.getElementById("fDuration").value = tpl? tpl.duration : "";
+    document.getElementById("fLocation").value = tpl? tpl.location : "";
+    document.getElementById("fLook").value = tpl? tpl.look : "не нужен";
+    document.getElementById("fNote").value = tpl? tpl.note : "";
+    showOverlay("formOverlay");
+  }
+
+  function openPlacedForm(b){
+    formMode = "placed";
+    formCatId = b.catId;
+    formPlacedId = b.placedId;
+    fillCategorySelect();
+    document.getElementById("fCategory").value = b.catId;
+    document.getElementById("formTitle").textContent = "Редактировать блок";
+    document.getElementById("fName").value = b.name;
+    document.getElementById("fDuration").value = b.duration;
+    document.getElementById("fLocation").value = b.location;
+    document.getElementById("fLook").value = b.look;
+    document.getElementById("fNote").value = b.note;
+    showOverlay("formOverlay");
+  }
+
+  document.getElementById("saveFormBtn").addEventListener("click", ()=>{
+    const name = document.getElementById("fName").value.trim();
+    if(!name){ alert("Введите название блока"); return; }
+    const newCat = document.getElementById("fCategory").value;
+    const duration = document.getElementById("fDuration").value.trim();
+    const location = document.getElementById("fLocation").value.trim();
+    const look = document.getElementById("fLook").value;
+    const note = document.getElementById("fNote").value.trim();
+
+    if(formMode === "template"){
+      if(formTplId){
+        // edit existing template, possibly moved category
+        let tpl = null;
+        for(const cid in data.templates){
+          const idx = data.templates[cid].findIndex(t=>t.id===formTplId);
+          if(idx>-1){ tpl = data.templates[cid][idx]; data.templates[cid].splice(idx,1); break; }
+        }
+        if(!tpl) tpl = {id:uid()};
+        tpl.name=name; tpl.duration=duration; tpl.location=location; tpl.look=look; tpl.note=note;
+        data.templates[newCat] = data.templates[newCat]||[];
+        data.templates[newCat].push(tpl);
+      } else {
+        data.templates[newCat] = data.templates[newCat]||[];
+        data.templates[newCat].push({id:uid(), name, duration, location, look, note});
+      }
+    } else if(formMode === "placed"){
+      const b = data.schedule[currentDay].find(x=>x.placedId===formPlacedId);
+      if(b){
+        b.catId=newCat; b.name=name; b.duration=duration; b.location=location; b.look=look; b.note=note;
+      }
+    }
+    save();
+    hideOverlay("formOverlay");
+    renderAll();
+  });
+
+  // ---------- OVERLAY HELPERS ----------
+  function showOverlay(id){ document.getElementById(id).classList.add("show"); }
+  function hideOverlay(id){ document.getElementById(id).classList.remove("show"); }
+  document.querySelectorAll("[data-close]").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      hideOverlay("detailOverlay");
+      hideOverlay("formOverlay");
+    });
+  });
+  document.querySelectorAll(".overlay").forEach(ov=>{
+    ov.addEventListener("click", (e)=>{ if(e.target===ov){ ov.classList.remove("show"); } });
+  });
+
+  // ---------- CLEAR DAY ----------
+  document.getElementById("clearDayBtn").addEventListener("click", ()=>{
+    if(confirm(`Очистить расписание на «${currentDay}»?`)){
+      data.schedule[currentDay] = [];
+      save();
+      renderAll();
+    }
+  });
+
+  function escapeHtml(str){
+    if(!str) return "";
+    return str.replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  }
+
+  function renderAll(){
+    renderDayTabs();
+    renderLibrary();
+    renderGrid();
+    renderBalance();
+  }
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
